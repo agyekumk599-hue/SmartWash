@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Treadsconn SmartWash</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f8fafc;
+        color: #111827;
+      }
+
+      /* HERO */
+      .hero {
+        height: 100vh;
+        background:
+          linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)),
+          url("images/laundry.jpg");
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        color: rgb(246, 12, 12);
+      }
+
+      .hero-content {
+        max-width: 800px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        text-align: left;
+      }
+
+      .hero .text-content {
+        flex: 1;
+      }
+
+      .hero .text-content h1 {
+        color: #d32f2f;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 62px;
+        margin-bottom: 20px;
+        font-weight: 700;
+      }
+
+      .hero .text-content h1 img {
+        width: 80px;
+        height: 80px;
+        display: inline-block;
+        flex-shrink: 0;
+      }
+
+      .hero p {
+        font-size: 22px;
+        line-height: 1.8;
+        margin-bottom: 35px;
+        color: #e5e7eb;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 15px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 8px;
+        transition: 0.3s;
+      }
+
+      .btn-primary {
+        background: #f10f0f;
+        color: white;
+      }
+
+      .btn-secondary {
+        background: white;
+        color: #111827;
+      }
+
+      .btn:hover {
+        transform: translateY(-4px);
+      }
+
+      /* FEATURES */
+      .features {
+        padding: 80px 30px;
+        text-align: center;
+      }
+
+      .features h2 {
+        font-size: 42px;
+        margin-bottom: 20px;
+      }
+
+      .features p {
+        max-width: 700px;
+        margin: auto;
+        color: #a8acb4;
+        font-size: 18px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-top: 50px;
+      }
+
+      .card {
+        background: rgb(250, 248, 248);
+        padding: 35px 25px;
+        border-radius: 14px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        transition: 0.3s;
+      }
+
+      .card:hover {
+        transform: translateY(-8px);
+      }
+
+      .card h3 {
+        font-size: 24px;
+        margin-bottom: 15px;
+      }
+
+      .card p {
+        color: #99a0ae;
+        line-height: 1.8;
+      }
+
+      /* FOOTER */
+      .footer {
+        background: #111827;
+        color: white;
+        margin-top: 80px;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      .red-box {
+        background: #dc2626;
+        padding: 50px 35px;
+      }
+
+      .red-box h2 {
+        font-size: 44px;
+        margin-bottom: 20px;
+      }
+
+      .red-box p {
+        line-height: 1.9;
+        font-size: 18px;
+        margin-bottom: 25px;
+      }
+
+      .subscribe {
+        display: flex;
+        margin-top: 20px;
+      }
+
+      .subscribe input {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        outline: none;
+      }
+
+      .subscribe button {
+        padding: 14px 18px;
+        border: none;
+        background: #0f172a;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .footer-box {
+        padding: 50px 30px;
+      }
+
+      .footer-box h3 {
+        font-size: 32px;
+        margin-bottom: 20px;
+      }
+
+      .footer-box p,
+      .footer-box a {
+        display: block;
+        margin-bottom: 14px;
+        color: #d1d5db;
+        text-decoration: none;
+      }
+
+      .footer-box a:hover {
+        color: #60a5fa;
+        padding-left: 8px;
+        transition: 0.3s;
+      }
+
+      .bottom {
+        background: black;
+        text-align: center;
+        padding: 25px;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      /* MOBILE */
+      @media (max-width: 768px) {
+        .hero-content {
+          flex-direction: column;
+          text-align: center;
+          gap: 20px;
+        }
+
+        .hero .text-content h1 {
+          justify-content: center;
+          font-size: 38px;
+        }
+
+        .hero .text-content h1 img {
+          width: 60px;
+          height: 60px;
+        }
+
+        .hero p {
+          font-size: 18px;
+        }
+
+        .btn {
+          display: block;
+          width: 220px;
+          margin: 10px auto;
+        }
+
+        .features h2 {
+          font-size: 30px;
+        }
+
+        .red-box h2,
+        .footer-box h3 {
+          font-size: 30px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="text-content">
+          <h1>
+            <img
+              src="images/treadsonn logo.png"
+              alt="Treadsconn Logo"
+              class="logo"
+            />
+            Treadsconn SmartWash
+          </h1>
+
+          <p>
+            Premium Laundry Management Software for Modern Businesses. Track
+            orders, notify customers, manage operations and grow professionally.
+          </p>
+
+          <a href="app.html" class="btn btn-primary">Login</a>
+          <a href="mailto:agyekumk599@gmail.com" class="btn btn-secondary"
+            >Request Demo</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features">
+      <h2>Why Choose SmartWash?</h2>
+
+      <p>
+        Built by Treadsconn to help laundry businesses run faster, smarter and
+        more professionally.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Order Tracking</h3>
+          <p>
+            Manage orders from pending to delivered with live status updates.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Customer Alerts</h3>
+          <p>Send notifications instantly when laundry is ready for pickup.</p>
+        </div>
+
+        <div class="card">
+          <h3>Business Reports</h3>
+          <p>Track daily revenue, completed jobs and business growth.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <section class="footer">
+      <div class="footer-grid">
+        <div class="red-box">
+          <h2>Treadsconn</h2>
+
+          <p>
+            Delivering premium software and technology solutions for growing
+            businesses in Ghana.
+          </p>
+
+          <div class="subscribe">
+            <input type="email" placeholder="Your email address" />
+            <button>Subscribe</button>
+          </div>
+        </div>
+
+        <div class="footer-box">
+          <h3>Get In Touch</h3>
+          <p>📍 Accra, Ghana</p>
+          <p>📧 agyekumk599@gmail.com</p>
+          <p>📞 0244726991</p>
+          <p>📞 0504465736</p>
+        </div>
+
+        <div class="footer-box">
+          <h3>Quick Links</h3>
+          <a href="#">Home</a>
+          <a href="#">Features</a>
+          <a href="app.html">Login</a>
+          <a href="#">Contact</a>
+        </div>
+
+        <div class="footer-box">
+          <h3>Products</h3>
+          <a href="#">SmartWash</a>
+          <a href="#">POS Systems</a>
+          <a href="#">Business Software</a>
+          <a href="#">Custom Projects</a>
+        </div>
+      </div>
+
+      <div class="bottom">
+        © 2026 Treadsconn. All Rights Reserved.<br />
+        SmartWash is a premium software product by Treadsconn.
+      </div>
+    </section>
+  </body>
+</html>
