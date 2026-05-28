@@ -181,6 +181,8 @@
         height: 60px;
         margin: 0 auto 18px auto;
         display: block;
+        color: #ff1f1f; /* icon color controlled by CSS */
+        transition: transform 0.25s ease;
       }
 
       .card:hover {
@@ -283,6 +285,14 @@
         .hero-content {
           flex-direction: column;
           text-align: center;
+        }
+
+        /* stack and center CTA elements inside the text area */
+        .text-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 18px;
         }
 
         .hero .text-content h1 {
@@ -414,7 +424,7 @@
             <!-- Washing machine SVG -->
             <svg
               viewBox="0 0 24 24"
-              fill="#ff1f1f"
+              fill="currentColor"
               xmlns="http://www.w3.org/2000/svg"
               width="60"
               height="60"
@@ -437,7 +447,7 @@
             <!-- Bell/alert SVG -->
             <svg
               viewBox="0 0 24 24"
-              fill="#ff1f1f"
+              fill="currentColor"
               xmlns="http://www.w3.org/2000/svg"
               width="60"
               height="60"
@@ -457,7 +467,7 @@
             <!-- Chart/report SVG -->
             <svg
               viewBox="0 0 24 24"
-              fill="#ff1f1f"
+              fill="currentColor"
               xmlns="http://www.w3.org/2000/svg"
               width="60"
               height="60"
