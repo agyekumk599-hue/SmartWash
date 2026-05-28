@@ -143,18 +143,20 @@
         transform: translateY(-4px);
       }
 
-      /* Stack and center CTAs inside the hero text area */
+      /* Center CTA buttons as an inline group */
       .text-content {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 12px;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
       }
 
       .text-content .btn {
-        display: block;
-        width: 220px;
-        margin: 8px 0;
+        display: inline-flex;
+        width: auto;
+        margin: 0;
       }
 
       /* FEATURES */
@@ -327,6 +329,13 @@
           display: block;
           width: 220px;
           margin: 10px auto;
+        }
+
+        /* keep hero CTAs inline even on small screens */
+        .hero .text-content .btn {
+          display: inline-flex;
+          width: auto;
+          margin: 0;
         }
 
         .features h2 {
