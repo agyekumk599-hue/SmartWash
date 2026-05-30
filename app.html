@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SmartWash - Laundry Management System</title>
+    <title>Smartwash Laundry Management</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,14 +16,14 @@
     />
     <style>
       :root {
-        --primary: #3b82f6;
-        --primary-dark: #2563eb;
-        --primary-light: #dbeafe;
+        --primary: #10b981;
+        --primary-dark: #059669;
+        --primary-light: #d1fae5;
         --secondary: #64748b;
         --success: #10b981;
         --warning: #f59e0b;
         --danger: #ef4444;
-        --background: #f8fafc;
+        --background: #f0fdf4;
         --surface: #ffffff;
         --text: #1e293b;
         --text-muted: #64748b;
@@ -240,6 +240,7 @@
       .dashboard-container {
         display: none;
         min-height: 100vh;
+        background: var(--background);
       }
 
       .sidebar {
@@ -250,6 +251,7 @@
         height: 100vh;
         background: var(--surface);
         border-right: 1px solid var(--border);
+        box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
         z-index: 100;
         transition: var(--transition);
         display: flex;
@@ -257,15 +259,16 @@
       }
 
       .sidebar.collapsed {
-        width: 80px;
+        width: 96px;
       }
 
       .sidebar-header {
-        padding: 24px;
+        padding: 28px 24px;
         border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
+        background: var(--surface);
       }
 
       .sidebar.collapsed .sidebar-header {
@@ -287,7 +290,7 @@
       }
 
       .toggle-sidebar:hover {
-        background: var(--primary-light);
+        background: rgba(59, 130, 246, 0.15);
       }
 
       .sidebar.collapsed .toggle-sidebar {
@@ -401,8 +404,10 @@
       /* Main Content */
       .main-content {
         margin-left: 280px;
-        padding: 24px 32px;
+        padding: 30px 36px;
         transition: var(--transition);
+        min-height: 100vh;
+        background: transparent;
       }
 
       .sidebar.collapsed + .main-content {
@@ -415,11 +420,11 @@
         align-items: center;
         margin-bottom: 32px;
         gap: 16px;
-        padding: 15px 25px;
+        padding: 20px 28px;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-sm);
+        border-radius: calc(var(--radius) + 4px);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
         flex-wrap: wrap;
       }
 
@@ -462,15 +467,32 @@
         flex-wrap: wrap;
       }
 
+      .top-action-btn {
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .top-action-btn:hover {
+        background: var(--primary-light);
+        border-color: var(--primary);
+      }
+
       .live-clock {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 6px 12px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        color: #9fb3d1;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
         font-size: 13px;
         font-weight: 500;
         line-height: 1.3;
@@ -760,14 +782,15 @@
       .content-card {
         background: var(--surface);
         border-radius: var(--radius);
-        box-shadow: var(--shadow);
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
         overflow: hidden;
+        border: 1px solid var(--border);
       }
 
       .recent-orders-card {
-        background: var(--background);
+        background: var(--surface);
         border: 1px solid var(--border);
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
       }
 
       .card-header {
@@ -817,16 +840,16 @@
 
       .header-search {
         position: relative;
-        width: 200px;
+        width: 240px;
       }
 
       .header-search input {
         width: 100%;
-        padding: 8px 12px 8px 32px;
+        padding: 10px 14px 10px 36px;
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
+        border-radius: 14px;
         font-size: 13px;
-        background: var(--background);
+        background: var(--surface);
         color: var(--text);
         transition: var(--transition);
       }
@@ -847,13 +870,13 @@
       }
 
       .btn-primary {
-        padding: 10px 20px;
-        background: var(--primary);
+        padding: 10px 24px;
+        background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
         color: white;
         border: none;
-        border-radius: var(--radius-sm);
+        border-radius: 14px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
@@ -862,9 +885,9 @@
       }
 
       .btn-primary:hover {
-        background: var(--primary-dark);
+        background: linear-gradient(135deg, #3730a3 0%, #1d4ed8 100%);
         transform: translateY(-1px);
-        box-shadow: var(--shadow);
+        box-shadow: 0 14px 34px rgba(59, 130, 246, 0.18);
       }
 
       /* Table Styles */
@@ -996,6 +1019,10 @@
         color: var(--success);
       }
 
+      .hidden {
+        display: none !important;
+      }
+
       .action-btn.edit:hover {
         background: var(--primary);
         color: white;
@@ -1095,6 +1122,69 @@
         padding: 24px;
         overflow-y: auto;
         max-height: calc(90vh - 140px);
+      }
+
+      /* Order Form Styling */
+      #placeOrderForm .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      #placeOrderForm .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      #placeOrderForm .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      #placeOrderForm .form-input,
+      #placeOrderForm .form-select {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        background: var(--surface);
+        color: var(--text);
+      }
+
+      #placeOrderForm .form-input:focus,
+      #placeOrderForm .form-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      }
+
+      #orderItemsTable {
+        border-collapse: collapse;
+      }
+
+      #orderItemsTable th {
+        background: var(--background);
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 12px;
+        color: var(--text-muted);
+        border-bottom: 2px solid var(--border);
+      }
+
+      #orderItemsTable td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      #orderItemsTable input {
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 14px;
       }
 
       .form-row {
@@ -1633,9 +1723,8 @@
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
       <div class="spinner"></div>
-      <div class="loading-text">Loading SmartWash...</div>
+      <div class="loading-text">Loading Smartwash Laundry Management...</div>
     </div>
-
     <!-- Login Page -->
     <div class="login-container" id="loginPage">
       <div class="login-card">
@@ -1643,7 +1732,7 @@
           <div class="logo-icon">
             <i class="fas fa-soap"></i>
           </div>
-          <span class="logo-text">SmartWash</span>
+          <span class="logo-text">Smartwash Laundry Management</span>
         </div>
 
         <form id="loginForm">
@@ -1709,7 +1798,9 @@
           >
             <i class="fas fa-soap"></i>
           </div>
-          <span class="logo-text" style="font-size: 22px">SmartWash</span>
+          <span class="logo-text" style="font-size: 22px"
+            >Laundry Management</span
+          >
           <div class="toggle-sidebar" onclick="toggleSidebar()">
             <i class="fas fa-chevron-left"></i>
           </div>
@@ -1721,23 +1812,55 @@
             onclick="showSection('overview')"
             id="nav-overview"
           >
-            <i class="fas fa-chart-pie"></i>
-            <span class="nav-text">Overview</span>
+            <i class="fas fa-home"></i>
+            <span class="nav-text">Dashboard</span>
           </div>
           <div class="nav-item" onclick="showSection('orders')" id="nav-orders">
             <i class="fas fa-shopping-bag"></i>
             <span class="nav-text">Orders</span>
           </div>
+          <div class="nav-item" onclick="showSection('pickup')" id="nav-pickup">
+            <i class="fas fa-truck-pickup"></i>
+            <span class="nav-text">Pickup</span>
+          </div>
           <div
-            class="nav-item admin-only"
+            class="nav-item"
+            onclick="showSection('delivery')"
+            id="nav-delivery"
+          >
+            <i class="fas fa-cube"></i>
+            <span class="nav-text">Delivery</span>
+          </div>
+          <div
+            class="nav-item"
+            onclick="showSection('subscriptions')"
+            id="nav-subscriptions"
+          >
+            <i class="fas fa-crown"></i>
+            <span class="nav-text">Subscriptions</span>
+          </div>
+          <div
+            class="nav-item"
             onclick="showSection('customers')"
             id="nav-customers"
           >
             <i class="fas fa-users"></i>
             <span class="nav-text">Customers</span>
           </div>
+          <div class="nav-item" onclick="showSection('staff')" id="nav-staff">
+            <i class="fas fa-user-tie"></i>
+            <span class="nav-text">Staff</span>
+          </div>
           <div
-            class="nav-item admin-only"
+            class="nav-item"
+            onclick="showSection('settings')"
+            id="nav-settings"
+          >
+            <i class="fas fa-cog"></i>
+            <span class="nav-text">Settings</span>
+          </div>
+          <div
+            class="nav-item"
             onclick="showSection('notifications')"
             id="nav-notifications"
           >
@@ -1751,7 +1874,7 @@
             >
           </div>
           <div
-            class="nav-item admin-only"
+            class="nav-item"
             onclick="showSection('reports')"
             id="nav-reports"
           >
@@ -1804,6 +1927,9 @@
             </div>
           </div>
           <div class="top-actions">
+            <button class="top-action-btn">Subscription</button>
+            <button class="top-action-btn">Edit app</button>
+            <button class="top-action-btn">Help</button>
             <div class="header-search">
               <i class="fas fa-search"></i>
               <input
@@ -1941,37 +2067,300 @@
 
         <!-- Orders Section -->
         <div class="section" id="ordersSection">
-          <div class="filter-tabs">
-            <div class="filter-tab active" onclick="filterOrders('all')">
-              All Orders
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Place New Order</h3>
             </div>
-            <div class="filter-tab" onclick="filterOrders('pending')">
-              Pending
-            </div>
-            <div class="filter-tab" onclick="filterOrders('washing')">
-              Washing
-            </div>
-            <div class="filter-tab" onclick="filterOrders('ready')">Ready</div>
-            <div class="filter-tab" onclick="filterOrders('delivered')">
-              Delivered
+            <div class="modal-body">
+              <form id="placeOrderForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Customer *</label>
+                    <select
+                      class="form-select"
+                      id="placeOrderCustomer"
+                      required
+                    >
+                      <option value="">Select Customer</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Service *</label>
+                    <select class="form-select" id="placeOrderService" required>
+                      <option value="Washing">Washing</option>
+                      <option value="Dry Cleaning">Dry Cleaning</option>
+                      <option value="Ironing">Ironing</option>
+                      <option value="Full Service">Full Service</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 24px">
+                  <label class="form-label">Order Details *</label>
+                  <div class="table-container">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 35%">Product</th>
+                          <th style="width: 20%">Quantity</th>
+                          <th style="width: 20%">Unit Price</th>
+                          <th style="width: 20%">Amount</th>
+                          <th style="width: 5%"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="orderItemsTable">
+                        <tr>
+                          <td>
+                            <input
+                              type="text"
+                              class="form-input"
+                              placeholder="Item name"
+                              style="width: 100%"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              class="form-input"
+                              value="1"
+                              min="1"
+                              style="width: 100%"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              class="form-input"
+                              value="0.00"
+                              step="0.01"
+                              style="width: 100%"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              class="form-input"
+                              value="0.00"
+                              step="0.01"
+                              readonly
+                              style="width: 100%; background: var(--background)"
+                            />
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              class="action-btn delete"
+                              onclick="removeOrderItem(this)"
+                              style="width: 100%"
+                            >
+                              ✕
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="addOrderItem()"
+                    style="
+                      margin-top: 12px;
+                      background: var(--primary);
+                      color: white;
+                      border: none;
+                    "
+                  >
+                    <i class="fas fa-plus"></i> Add New
+                  </button>
+                </div>
+
+                <div class="form-row" style="margin-top: 24px">
+                  <div>
+                    <label class="form-label">Charges</label>
+                    <div
+                      style="display: flex; flex-direction: column; gap: 12px"
+                    >
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          padding: 12px;
+                          background: var(--background);
+                          border-radius: var(--radius-sm);
+                        "
+                      >
+                        <span>Subtotal</span>
+                        <input
+                          type="number"
+                          class="form-input"
+                          id="subtotal"
+                          value="0.00"
+                          readonly
+                          style="
+                            width: 100px;
+                            border: none;
+                            background: transparent;
+                            text-align: right;
+                            font-weight: 600;
+                          "
+                        />
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          padding: 12px;
+                          background: var(--background);
+                          border-radius: var(--radius-sm);
+                        "
+                      >
+                        <span>Tax Amount</span>
+                        <input
+                          type="number"
+                          class="form-input"
+                          id="taxAmount"
+                          value="0.00"
+                          step="0.01"
+                          style="
+                            width: 100px;
+                            border: none;
+                            background: transparent;
+                            text-align: right;
+                          "
+                        />
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          padding: 12px;
+                          background: var(--background);
+                          border-radius: var(--radius-sm);
+                        "
+                      >
+                        <strong>Total Amount</strong>
+                        <input
+                          type="number"
+                          class="form-input"
+                          id="totalAmount"
+                          value="0.00"
+                          readonly
+                          style="
+                            width: 100px;
+                            border: none;
+                            background: transparent;
+                            text-align: right;
+                            font-weight: 700;
+                            color: var(--primary);
+                          "
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="form-label">Additional Charges</label>
+                    <div
+                      style="display: flex; flex-direction: column; gap: 12px"
+                    >
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          padding: 12px;
+                          background: var(--background);
+                          border-radius: var(--radius-sm);
+                        "
+                      >
+                        <span>Pickup Charge</span>
+                        <input
+                          type="number"
+                          class="form-input"
+                          id="pickupCharge"
+                          value="0.00"
+                          step="0.01"
+                          onchange="calculateTotal()"
+                          style="
+                            width: 100px;
+                            border: none;
+                            background: transparent;
+                            text-align: right;
+                          "
+                        />
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          padding: 12px;
+                          background: var(--background);
+                          border-radius: var(--radius-sm);
+                        "
+                      >
+                        <span>Delivery Charge</span>
+                        <input
+                          type="number"
+                          class="form-input"
+                          id="deliveryCharge"
+                          value="0.00"
+                          step="0.01"
+                          onchange="calculateTotal()"
+                          style="
+                            width: 100px;
+                            border: none;
+                            background: transparent;
+                            text-align: right;
+                          "
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 24px">
+                  <div class="form-group">
+                    <label class="form-label">Pickup Type *</label>
+                    <select class="form-select" required>
+                      <option value="Door Pickup">Door Pickup</option>
+                      <option value="Store Pickup">Store Pickup</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Delivery Type *</label>
+                    <select class="form-select" required>
+                      <option value="Door Delivery">Door Delivery</option>
+                      <option value="Store Pickup">Store Pickup</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    display: flex;
+                    gap: 12px;
+                    margin-top: 24px;
+                    justify-content: flex-end;
+                  "
+                >
+                  <button type="reset" class="btn-secondary">Clear</button>
+                  <button type="submit" class="btn-primary">Place Order</button>
+                </div>
+              </form>
             </div>
           </div>
 
-          <div class="content-card">
+          <div class="content-card" style="margin-top: 32px">
             <div class="card-header">
+              <h3 class="card-title">All Orders</h3>
               <div class="search-box">
                 <i class="fas fa-search"></i>
                 <input
                   type="text"
-                  placeholder="Search customer, phone, or order ID..."
+                  placeholder="Search orders..."
                   id="searchInput"
                   onkeyup="searchOrders()"
                 />
               </div>
-              <button class="btn-primary admin-only" id="addOrderBtn">
-                <i class="fas fa-plus"></i>
-                Add Order
-              </button>
             </div>
             <div class="table-container">
               <table class="data-table">
@@ -1983,7 +2372,6 @@
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th>Notified</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -1991,6 +2379,287 @@
                   <!-- Dynamic content -->
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pickup Section -->
+        <div class="section" id="pickupSection">
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Pickup Management</h3>
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input
+                  type="text"
+                  placeholder="Search pickups..."
+                  onkeyup="searchPickups()"
+                />
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Pickup Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="pickupTable">
+                  <!-- Dynamic content -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivery Section -->
+        <div class="section" id="deliverySection">
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Delivery Management</h3>
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input
+                  type="text"
+                  placeholder="Search deliveries..."
+                  onkeyup="searchDeliveries()"
+                />
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Delivery Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="deliveryTable">
+                  <!-- Dynamic content -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subscriptions Section -->
+        <div class="section" id="subscriptionsSection">
+          <div class="stats-grid">
+            <div class="stat-card success">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-label">Active Subscriptions</div>
+                  <div class="stat-value" id="activeSubscriptions">0</div>
+                </div>
+                <div class="stat-icon">
+                  <i class="fas fa-crown"></i>
+                </div>
+              </div>
+            </div>
+            <div class="stat-card info">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-label">Monthly Revenue</div>
+                  <div class="stat-value" id="subscriptionRevenue">
+                    GHS 0.00
+                  </div>
+                </div>
+                <div class="stat-icon">
+                  <i class="fas fa-coins"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">Subscription Plans</h3>
+              <button
+                class="btn-primary"
+                onclick="addSubscriptionPlan()"
+                style="width: auto"
+              >
+                <i class="fas fa-plus"></i>
+                Add Plan
+              </button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Frequency</th>
+                    <th>Status</th>
+                    <th>Start Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="subscriptionsTable">
+                  <!-- Dynamic content -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Staff Section -->
+        <div class="section" id="staffSection">
+          <div class="content-card admin-staff-card">
+            <div class="card-header">
+              <h3 class="card-title">Staff Management</h3>
+              <button
+                class="btn-primary admin-only"
+                onclick="addStaff()"
+                style="width: auto"
+              >
+                <i class="fas fa-plus"></i>
+                Add Staff
+              </button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="staffTable">
+                  <!-- Dynamic content -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="content-card staff-profile-card hidden">
+            <div class="card-header">
+              <h3 class="card-title">My Profile</h3>
+            </div>
+            <div class="modal-body">
+              <div style="display: grid; gap: 16px">
+                <div>
+                  <strong>Name:</strong>
+                  <div
+                    id="profileName"
+                    style="margin-top: 6px; color: var(--text-muted)"
+                  ></div>
+                </div>
+                <div>
+                  <strong>Email:</strong>
+                  <div
+                    id="profileEmail"
+                    style="margin-top: 6px; color: var(--text-muted)"
+                  ></div>
+                </div>
+                <div>
+                  <strong>Role:</strong>
+                  <div
+                    id="profileRole"
+                    style="margin-top: 6px; color: var(--text-muted)"
+                  ></div>
+                </div>
+                <div>
+                  <strong>Status:</strong>
+                  <div
+                    id="profileStatus"
+                    style="margin-top: 6px; color: var(--text-muted)"
+                  ></div>
+                </div>
+                <div
+                  style="
+                    padding: 16px;
+                    background: var(--background);
+                    border-radius: var(--radius-sm);
+                  "
+                >
+                  <p style="margin: 0; color: var(--text)">
+                    This page adapts to your role. Admins can manage the team,
+                    while staff can view their profile and assigned work.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="section" id="settingsSection">
+          <div class="content-card">
+            <div class="card-header">
+              <h3 class="card-title">System Settings</h3>
+            </div>
+            <div class="modal-body">
+              <div class="notification-settings">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <h4>Auto-notify on "Ready" status</h4>
+                    <p>Automatically send SMS when order is ready for pickup</p>
+                  </div>
+                  <div
+                    class="toggle-switch active"
+                    id="autoNotifyReady"
+                    onclick="toggleSetting(this)"
+                  ></div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <h4>Auto-notify on "Delivered" status</h4>
+                    <p>Send confirmation when order is delivered/collected</p>
+                  </div>
+                  <div
+                    class="toggle-switch active"
+                    id="autoNotifyDelivered"
+                    onclick="toggleSetting(this)"
+                  ></div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <h4>Marketing Notifications</h4>
+                    <p>Allow promotional messages and offers</p>
+                  </div>
+                  <div
+                    class="toggle-switch"
+                    id="marketingNotify"
+                    onclick="toggleSetting(this)"
+                  ></div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <h4>Order Updates via WhatsApp</h4>
+                    <p>Enable WhatsApp Business integration</p>
+                  </div>
+                  <div
+                    class="toggle-switch"
+                    id="whatsappNotify"
+                    onclick="toggleSetting(this)"
+                  ></div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 12px; margin-top: 24px">
+                <button
+                  class="btn-primary"
+                  onclick="saveNotificationSettings()"
+                >
+                  <i class="fas fa-save"></i>
+                  Save Settings
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2141,7 +2810,7 @@
               <div class="sms-preview">
                 <strong>SMS Preview:</strong><br />
                 Hi [Customer], your [Service] order #[OrderID] is now ready for
-                collection at SmartWash. Total: GHS[Amount]. Open hours:
+                collection at Smartwash. Total: GHS[Amount]. Open hours:
                 8AM-8PM. Reply STOP to opt out.
               </div>
             </div>
@@ -2365,6 +3034,65 @@
             <i class="fas fa-save"></i>
             Save Order
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Staff Modal -->
+    <div class="modal-overlay" id="staffModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Add Staff Member</h3>
+          <button class="modal-close" type="button" onclick="closeStaffModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="staffForm">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-input" id="staffName" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-input" id="staffEmail" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input
+                type="tel"
+                class="form-input"
+                id="staffPhone"
+                placeholder="e.g. 555-0202"
+              />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Role</label>
+                <select class="form-select" id="staffRole">
+                  <option value="staff">Staff</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="staffStatus">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                class="btn-secondary"
+                type="button"
+                onclick="closeStaffModal()"
+              >
+                Cancel
+              </button>
+              <button class="btn" type="submit">Save Staff</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

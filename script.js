@@ -21,6 +21,7 @@ const DataStore = {
   tenantId: "smartwash-demo",
   orders: [],
   notifications: [],
+  staff: [],
   settings: {
     autoNotifyReady: true,
     autoNotifyDelivered: true,
@@ -219,6 +220,26 @@ const DataStore = {
       );
     }
 
+    if (!localStorage.getItem("smartwash_staff")) {
+      const sampleStaff = [
+        {
+          name: "Staff Member",
+          email: "staff@smartwash.com",
+          phone: "555-0202",
+          role: "staff",
+          status: "Active",
+        },
+        {
+          name: "Support Lead",
+          email: "support@smartwash.com",
+          phone: "555-0203",
+          role: "staff",
+          status: "Active",
+        },
+      ];
+      localStorage.setItem("smartwash_staff", JSON.stringify(sampleStaff));
+    }
+
     if (!localStorage.getItem("smartwash_settings")) {
       localStorage.setItem("smartwash_settings", JSON.stringify(this.settings));
     }
@@ -230,6 +251,7 @@ const DataStore = {
       this.notifications = JSON.parse(
         localStorage.getItem("smartwash_notifications") || "[]",
       );
+      this.staff = JSON.parse(localStorage.getItem("smartwash_staff") || "[]");
       this.settings = JSON.parse(
         localStorage.getItem("smartwash_settings") || "{}",
       );
@@ -292,6 +314,36 @@ const DataStore = {
     const orders = this.getOrders().filter((o) => o.id !== id);
     localStorage.setItem("smartwash_orders", JSON.stringify(orders));
     this.orders = orders;
+  },
+
+  getStaff() {
+    return this.useFirestore && this.currentUser?.tenantId
+      ? this.staff
+      : JSON.parse(localStorage.getItem("smartwash_staff") || "[]");
+  },
+
+  async saveStaff(staffList) {
+    if (this.useFirestore && this.currentUser?.tenantId) {
+      this.staff = staffList;
+      return staffList;
+    }
+
+    localStorage.setItem("smartwash_staff", JSON.stringify(staffList));
+    this.staff = staffList;
+    return staffList;
+  },
+
+  async addStaff(staffMember) {
+    const staff = this.getStaff();
+    staff.push(staffMember);
+    await this.saveStaff(staff);
+    return staffMember;
+  },
+
+  async deleteStaff(email) {
+    const staff = this.getStaff().filter((member) => member.email !== email);
+    await this.saveStaff(staff);
+    return staff;
   },
 
   getNotifications() {
@@ -459,6 +511,7 @@ function showDashboard() {
   document.getElementById("dashboard").style.display = "block";
   updateUserInterface();
   loadData();
+  showSection("orders");
   updateNotificationBadge();
 
   const loader = document.getElementById("loadingScreen");
@@ -588,14 +641,17 @@ function showSection(section) {
     overview: "Dashboard Overview",
     orders: "All Orders",
     customers: "Customer Management",
+    staff: "Staff Management",
     notifications: "Notification Center",
     reports: "Reports & Analytics",
   };
-  document.getElementById("pageTitle").textContent = titles[section];
+  document.getElementById("pageTitle").textContent =
+    titles[section] || "Smartwash Laundry Management";
 
   if (section === "customers") loadCustomers();
   if (section === "reports") loadReports();
   if (section === "notifications") loadNotificationCenter();
+  if (section === "staff") loadStaffSection();
 
   document.getElementById("sidebar").classList.remove("mobile-open");
   document.getElementById("notificationDropdown").classList.remove("show");
@@ -607,6 +663,26 @@ function toggleNotificationDropdown() {
   dropdown.classList.toggle("show");
   if (dropdown.classList.contains("show")) {
     loadNotificationDropdown();
+  }
+}
+
+function loadStaffSection() {
+  const isAdmin = currentUser?.role === "admin";
+  const adminCard = document.querySelector(".admin-staff-card");
+  const profileCard = document.querySelector(".staff-profile-card");
+  const profileName = document.getElementById("profileName");
+  const profileEmail = document.getElementById("profileEmail");
+  const profileRole = document.getElementById("profileRole");
+  const profileStatus = document.getElementById("profileStatus");
+
+  if (adminCard) adminCard.classList.toggle("hidden", !isAdmin);
+  if (profileCard) profileCard.classList.toggle("hidden", isAdmin);
+
+  if (!isAdmin && profileName && profileEmail && profileRole && profileStatus) {
+    profileName.textContent = currentUser.name;
+    profileEmail.textContent = currentUser.email;
+    profileRole.textContent = currentUser.role;
+    profileStatus.textContent = "Active";
   }
 }
 
@@ -760,6 +836,8 @@ function loadData() {
 
   loadRecentOrders();
   loadAllOrders();
+  loadCustomerDropdown();
+  loadStaffTable();
 }
 
 function loadRecentOrders() {
@@ -1598,26 +1676,41 @@ function showToast(message, type = "success") {
 function toggleDarkMode() {
   const html = document.documentElement;
   const isDark = html.getAttribute("data-theme") === "dark";
+  const icon = document.getElementById("darkModeIcon");
 
   if (isDark) {
     html.removeAttribute("data-theme");
-    localStorage.setItem("washify_theme", "light");
-    document.getElementById("darkModeIcon").classList.remove("fa-sun");
-    document.getElementById("darkModeIcon").classList.add("fa-moon");
+    localStorage.setItem("smartwash_theme", "light");
+    if (icon) {
+      icon.classList.remove("fa-sun");
+      icon.classList.add("fa-moon");
+    }
   } else {
     html.setAttribute("data-theme", "dark");
     localStorage.setItem("smartwash_theme", "dark");
-    document.getElementById("darkModeIcon").classList.remove("fa-moon");
-    document.getElementById("darkModeIcon").classList.add("fa-sun");
+    if (icon) {
+      icon.classList.remove("fa-moon");
+      icon.classList.add("fa-sun");
+    }
   }
 }
 
 function loadTheme() {
-  const theme = localStorage.getItem("washify_theme");
+  const theme = localStorage.getItem("smartwash_theme");
+  const icon = document.getElementById("darkModeIcon");
+
   if (theme === "dark") {
     document.documentElement.setAttribute("data-theme", "dark");
-    document.getElementById("darkModeIcon").classList.remove("fa-moon");
-    document.getElementById("darkModeIcon").classList.add("fa-sun");
+    if (icon) {
+      icon.classList.remove("fa-moon");
+      icon.classList.add("fa-sun");
+    }
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    if (icon) {
+      icon.classList.remove("fa-sun");
+      icon.classList.add("fa-moon");
+    }
   }
   loadSettings();
 }
@@ -1682,3 +1775,208 @@ document
 document
   .getElementById("sendNotificationBtn")
   .addEventListener("click", sendManualNotification);
+
+// ========== NEW FUNCTIONS FOR REDESIGNED UI ==========
+
+// Place Order Form Functions
+function addOrderItem() {
+  const tbody = document.getElementById("orderItemsTable");
+  const newRow = document.createElement("tr");
+  newRow.innerHTML = `
+    <td><input type="text" class="form-input" placeholder="Item name" style="width: 100%;" /></td>
+    <td><input type="number" class="form-input" value="1" min="1" style="width: 100%;" onchange="calculateTotal()" /></td>
+    <td><input type="number" class="form-input" value="0.00" step="0.01" style="width: 100%;" onchange="calculateTotal()" /></td>
+    <td><input type="number" class="form-input" value="0.00" step="0.01" readonly style="width: 100%; background: var(--background);" /></td>
+    <td><button type="button" class="action-btn delete" onclick="removeOrderItem(this)" style="width: 100%;">✕</button></td>
+  `;
+  tbody.appendChild(newRow);
+}
+
+function removeOrderItem(btn) {
+  btn.closest("tr").remove();
+  calculateTotal();
+}
+
+function calculateTotal() {
+  const tbody = document.getElementById("orderItemsTable");
+  const rows = tbody.querySelectorAll("tr");
+  let subtotal = 0;
+
+  rows.forEach((row) => {
+    const qty = parseFloat(row.cells[1].querySelector("input").value) || 0;
+    const price = parseFloat(row.cells[2].querySelector("input").value) || 0;
+    const amount = qty * price;
+    row.cells[3].querySelector("input").value = amount.toFixed(2);
+    subtotal += amount;
+  });
+
+  const tax = parseFloat(document.getElementById("taxAmount").value) || 0;
+  const pickup = parseFloat(document.getElementById("pickupCharge").value) || 0;
+  const delivery =
+    parseFloat(document.getElementById("deliveryCharge").value) || 0;
+
+  document.getElementById("subtotal").value = subtotal.toFixed(2);
+  document.getElementById("totalAmount").value = (
+    subtotal +
+    tax +
+    pickup +
+    delivery
+  ).toFixed(2);
+}
+
+// Load customer dropdown
+function loadCustomerDropdown() {
+  const customers = DataStore.getOrders();
+  const customerMap = {};
+  customers.forEach((order) => {
+    if (!customerMap[order.customer]) {
+      customerMap[order.customer] = true;
+    }
+  });
+
+  const select = document.getElementById("placeOrderCustomer");
+  if (select) {
+    select.innerHTML = '<option value="">Select Customer</option>';
+    Object.keys(customerMap).forEach((name) => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+  }
+}
+
+// Pickup, Delivery, Subscriptions, Staff, Settings placeholder functions
+function searchPickups() {
+  // Placeholder for pickup search
+}
+
+function searchDeliveries() {
+  // Placeholder for delivery search
+}
+
+function addSubscriptionPlan() {
+  showToast("Add Subscription Plan feature coming soon", "info");
+}
+
+function addStaff() {
+  openStaffModal();
+}
+
+function loadStaffTable() {
+  const staff = DataStore.getStaff();
+  const tbody = document.getElementById("staffTable");
+
+  if (!tbody) return;
+
+  if (staff.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" class="empty-state"><i class="fas fa-user-friends"></i><h3>No staff members yet</h3><p>Add your first team member to start managing staff.</p></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = staff
+    .map(
+      (member) => `
+        <tr>
+          <td>${member.name}</td>
+          <td>${member.email}</td>
+          <td>${member.phone || "-"}</td>
+          <td>${member.role}</td>
+          <td>${member.status}</td>
+          <td>
+            <button class="action-btn" onclick="deleteStaffMember('${member.email}')">Remove</button>
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+}
+
+function openStaffModal() {
+  const overlay = document.getElementById("staffModal");
+  if (overlay) overlay.classList.add("active");
+}
+
+function closeStaffModal() {
+  const overlay = document.getElementById("staffModal");
+  if (overlay) overlay.classList.remove("active");
+  const form = document.getElementById("staffForm");
+  if (form) form.reset();
+}
+
+async function deleteStaffMember(email) {
+  await DataStore.deleteStaff(email);
+  loadStaffTable();
+  showToast("Staff member removed", "success");
+}
+
+function handleStaffSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById("staffName").value.trim();
+  const email = document
+    .getElementById("staffEmail")
+    .value.trim()
+    .toLowerCase();
+  const phone = document.getElementById("staffPhone").value.trim();
+  const role = document.getElementById("staffRole").value;
+  const status = document.getElementById("staffStatus").value;
+
+  if (!name || !email) {
+    showToast("Name and email are required", "error");
+    return;
+  }
+
+  DataStore.addStaff({
+    name,
+    email,
+    phone,
+    role,
+    status,
+  }).then(() => {
+    loadStaffTable();
+    closeStaffModal();
+    showToast("Staff member added", "success");
+  });
+}
+
+// Initialize place order form on load
+document.addEventListener("DOMContentLoaded", function () {
+  const placeOrderForm = document.getElementById("placeOrderForm");
+  if (placeOrderForm) {
+    loadCustomerDropdown();
+    placeOrderForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const customer = document.getElementById("placeOrderCustomer").value;
+      const service = document.getElementById("placeOrderService").value;
+      const total = document.getElementById("totalAmount").value;
+
+      if (!customer) {
+        showToast("Please select a customer", "error");
+        return;
+      }
+
+      const order = {
+        customer: customer,
+        service: service,
+        price: parseFloat(total),
+        quantity: 1,
+        phone: "N/A",
+        status: "pending",
+      };
+
+      DataStore.saveOrder(order);
+      loadData();
+      showToast("Order placed successfully", "success");
+      this.reset();
+      calculateTotal();
+    });
+  }
+
+  const staffForm = document.getElementById("staffForm");
+  if (staffForm) {
+    staffForm.addEventListener("submit", handleStaffSubmit);
+  }
+
+  loadStaffTable();
+});
