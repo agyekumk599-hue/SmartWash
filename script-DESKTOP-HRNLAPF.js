@@ -21,6 +21,7 @@ const DataStore = {
   tenantId: "smartwash-demo",
   orders: [],
   notifications: [],
+  staff: [],
   settings: {
     autoNotifyReady: true,
     autoNotifyDelivered: true,
@@ -28,6 +29,7 @@ const DataStore = {
     whatsappNotify: false,
   },
   currentUser: null,
+  subscriptions: [],
 
   async init() {
     this.useFirestore = !!window.firebaseEnabled;
@@ -219,6 +221,59 @@ const DataStore = {
       );
     }
 
+    if (!localStorage.getItem("smartwash_staff")) {
+      const sampleStaff = [
+        {
+          name: "Staff Member",
+          email: "staff@smartwash.com",
+          phone: "555-0202",
+          role: "staff",
+          status: "Active",
+        },
+        {
+          name: "Support Lead",
+          email: "support@smartwash.com",
+          phone: "555-0203",
+          role: "staff",
+          status: "Active",
+        },
+      ];
+      localStorage.setItem("smartwash_staff", JSON.stringify(sampleStaff));
+    }
+
+    if (!localStorage.getItem("smartwash_subscriptions")) {
+      const sampleSubscriptions = [
+        {
+          id: 1,
+          customer: "John Doe",
+          plan: "Weekly Wash",
+          amount: 55.0,
+          frequency: "Weekly",
+          status: "Active",
+          startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 10),
+          tenantId: this.tenantId,
+        },
+        {
+          id: 2,
+          customer: "Jane Smith",
+          plan: "Biweekly Care",
+          amount: 39.99,
+          frequency: "Biweekly",
+          status: "Active",
+          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 10),
+          tenantId: this.tenantId,
+        },
+      ];
+      localStorage.setItem(
+        "smartwash_subscriptions",
+        JSON.stringify(sampleSubscriptions),
+      );
+    }
+
     if (!localStorage.getItem("smartwash_settings")) {
       localStorage.setItem("smartwash_settings", JSON.stringify(this.settings));
     }
@@ -229,6 +284,10 @@ const DataStore = {
       );
       this.notifications = JSON.parse(
         localStorage.getItem("smartwash_notifications") || "[]",
+      );
+      this.staff = JSON.parse(localStorage.getItem("smartwash_staff") || "[]");
+      this.subscriptions = JSON.parse(
+        localStorage.getItem("smartwash_subscriptions") || "[]",
       );
       this.settings = JSON.parse(
         localStorage.getItem("smartwash_settings") || "{}",
@@ -292,6 +351,63 @@ const DataStore = {
     const orders = this.getOrders().filter((o) => o.id !== id);
     localStorage.setItem("smartwash_orders", JSON.stringify(orders));
     this.orders = orders;
+  },
+
+  getStaff() {
+    return this.useFirestore && this.currentUser?.tenantId
+      ? this.staff
+      : JSON.parse(localStorage.getItem("smartwash_staff") || "[]");
+  },
+
+  async saveStaff(staffList) {
+    if (this.useFirestore && this.currentUser?.tenantId) {
+      this.staff = staffList;
+      return staffList;
+    }
+
+    localStorage.setItem("smartwash_staff", JSON.stringify(staffList));
+    this.staff = staffList;
+    return staffList;
+  },
+
+  async addStaff(staffMember) {
+    const staff = this.getStaff();
+    staff.push(staffMember);
+    await this.saveStaff(staff);
+    return staffMember;
+  },
+
+  async deleteStaff(email) {
+    const staff = this.getStaff().filter((member) => member.email !== email);
+    await this.saveStaff(staff);
+    return staff;
+  },
+
+  getSubscriptions() {
+    return this.useFirestore && this.currentUser?.tenantId
+      ? this.subscriptions
+      : JSON.parse(localStorage.getItem("smartwash_subscriptions") || "[]");
+  },
+
+  async saveSubscriptions(subscriptionList) {
+    if (this.useFirestore && this.currentUser?.tenantId) {
+      this.subscriptions = subscriptionList;
+      return subscriptionList;
+    }
+
+    localStorage.setItem(
+      "smartwash_subscriptions",
+      JSON.stringify(subscriptionList),
+    );
+    this.subscriptions = subscriptionList;
+    return subscriptionList;
+  },
+
+  async addSubscription(subscription) {
+    const subscriptions = this.getSubscriptions();
+    subscriptions.push(subscription);
+    await this.saveSubscriptions(subscriptions);
+    return subscription;
   },
 
   getNotifications() {
@@ -404,6 +520,7 @@ const DataStore = {
 
 // State Management
 let currentUser = null;
+let currentSection = "overview";
 let currentFilter = "all";
 let editingOrderId = null;
 let currentNotifyOrderId = null;
@@ -414,6 +531,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   checkAuth();
   loadTheme();
   startLiveClock();
+
+  const headerSearch = document.getElementById("headerSearch");
+  if (headerSearch) {
+    headerSearch.addEventListener("input", handleQuickSearch);
+  }
 });
 
 function startLiveClock() {
@@ -575,6 +697,8 @@ document.addEventListener("click", (e) => {
 
 // Navigation
 function showSection(section) {
+  currentSection = section;
+
   document
     .querySelectorAll(".nav-item")
     .forEach((item) => item.classList.remove("active"));
@@ -589,14 +713,23 @@ function showSection(section) {
     overview: "Dashboard Overview",
     orders: "All Orders",
     customers: "Customer Management",
+    staff: "Staff Management",
     notifications: "Notification Center",
     reports: "Reports & Analytics",
+    subscriptions: "Subscriptions",
   };
-  document.getElementById("pageTitle").textContent = titles[section];
+  document.getElementById("pageTitle").textContent =
+    titles[section] || "Smartwash Laundry Management";
 
   if (section === "customers") loadCustomers();
   if (section === "reports") loadReports();
   if (section === "notifications") loadNotificationCenter();
+  if (section === "staff") loadStaffSection();
+  if (section === "subscriptions") loadSubscriptions();
+  if (section === "overview") {
+    loadRecentOrders();
+    loadAllOrders();
+  }
 
   document.getElementById("sidebar").classList.remove("mobile-open");
   document.getElementById("notificationDropdown").classList.remove("show");
@@ -608,6 +741,26 @@ function toggleNotificationDropdown() {
   dropdown.classList.toggle("show");
   if (dropdown.classList.contains("show")) {
     loadNotificationDropdown();
+  }
+}
+
+function loadStaffSection() {
+  const isAdmin = currentUser?.role === "admin";
+  const adminCard = document.querySelector(".admin-staff-card");
+  const profileCard = document.querySelector(".staff-profile-card");
+  const profileName = document.getElementById("profileName");
+  const profileEmail = document.getElementById("profileEmail");
+  const profileRole = document.getElementById("profileRole");
+  const profileStatus = document.getElementById("profileStatus");
+
+  if (adminCard) adminCard.classList.toggle("hidden", !isAdmin);
+  if (profileCard) profileCard.classList.remove("hidden");
+
+  if (profileName && profileEmail && profileRole && profileStatus) {
+    profileName.textContent = currentUser.name;
+    profileEmail.textContent = currentUser.email;
+    profileRole.textContent = currentUser.role;
+    profileStatus.textContent = "Active";
   }
 }
 
@@ -687,21 +840,37 @@ async function markAllAsRead() {
 }
 
 function loadNotificationCenter() {
-  const notifications = DataStore.getNotifications();
+  const searchTerm =
+    document
+      .getElementById("notificationSearchInput")
+      ?.value.trim()
+      .toLowerCase() || "";
+  const notifications = DataStore.getNotifications().filter((n) => {
+    if (!searchTerm) return true;
+    return [
+      n.customer,
+      n.orderId?.toString(),
+      n.type,
+      n.channel,
+      n.status,
+      n.message,
+    ]
+      .filter(Boolean)
+      .some((field) => field.toLowerCase().includes(searchTerm));
+  });
   const tbody = document.getElementById("notificationHistoryTable");
 
   // Update stats
-  document.getElementById("notifTotalSent").textContent = notifications.length;
-  document.getElementById("notifDelivered").textContent = notifications.filter(
-    (n) => n.status === "delivered",
-  ).length;
-  document.getElementById("notifPending").textContent = notifications.filter(
-    (n) => n.status === "pending",
-  ).length;
+  document.getElementById("notifTotalSent").textContent =
+    DataStore.getNotifications().length;
+  document.getElementById("notifDelivered").textContent =
+    DataStore.getNotifications().filter((n) => n.status === "delivered").length;
+  document.getElementById("notifPending").textContent =
+    DataStore.getNotifications().filter((n) => n.status === "pending").length;
 
   if (notifications.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="7" class="empty-state"><i class="fas fa-inbox"></i><h3>No notifications sent yet</h3></td></tr>';
+      '<tr><td colspan="7" class="empty-state"><i class="fas fa-inbox"></i><h3>No notifications found</h3></td></tr>';
     return;
   }
 
@@ -715,28 +884,31 @@ function loadNotificationCenter() {
         reminder: "info",
         custom: "secondary",
       };
+      const statusClass =
+        n.status === "delivered" ? "status-ready" : "status-pending";
+      const badgeType = typeColors[n.type] || "secondary";
 
       return `
                     <tr>
-                        <td>GHS{date}</td>
+                        <td>${date}</td>
                         <td>
                             <div class="customer-info">
-                                <div class="customer-avatar">GHS{n.customer.charAt(0)}</div>
-                                <div class="customer-name">GHS{n.customer}</div>
+                                <div class="customer-avatar">${n.customer.charAt(0)}</div>
+                                <div class="customer-name">${n.customer}</div>
                             </div>
                         </td>
-                        <td>#GHS{n.orderId.toString().slice(-4)}</td>
-                        <td><span class="status-badge status-GHS{typeColors[n.type] || 'pending'}">GHS{n.type}</span></td>
+                        <td>#${n.orderId.toString().slice(-4)}</td>
+                        <td><span class="status-badge status-${badgeType}">${n.type}</span></td>
                         <td>
-                            <span class="channel-tag GHS{n.channel}">GHS{n.channel}</span>
+                            <span class="channel-tag ${n.channel}">${n.channel}</span>
                         </td>
                         <td>
-                            <span class="status-badge GHS{n.status === 'delivered' ? 'status-ready' : 'status-pending'}">
-                                GHS{n.status}
+                            <span class="status-badge ${statusClass}">
+                                ${n.status}
                             </span>
                         </td>
-                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="GHS{n.message}">
-                            GHS{n.message}
+                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${n.message}">
+                            ${n.message}
                         </td>
                     </tr>
                 `;
@@ -748,6 +920,7 @@ function loadNotificationCenter() {
 function loadData() {
   const orders = DataStore.getOrders();
   const notifications = DataStore.getNotifications();
+  const subscriptions = DataStore.getSubscriptions();
 
   document.getElementById("totalOrders").textContent = orders.length;
   document.getElementById("pendingOrders").textContent = orders.filter(
@@ -758,13 +931,31 @@ function loadData() {
   ).length;
   document.getElementById("totalNotifications").textContent =
     notifications.length;
+  document.getElementById("activeSubscriptions").textContent =
+    subscriptions.filter((s) => s.status === "Active").length;
+  document.getElementById("subscriptionRevenue").textContent =
+    `GHS ${subscriptions
+      .reduce((sum, sub) => sum + parseFloat(sub.amount || 0), 0)
+      .toFixed(2)}`;
 
   loadRecentOrders();
   loadAllOrders();
+  loadCustomerDropdown();
+  loadStaffTable();
 }
 
 function loadRecentOrders() {
-  const orders = DataStore.getOrders().slice(-5).reverse();
+  let orders = DataStore.getOrders().slice(-5).reverse();
+  const searchTerm =
+    document.getElementById("headerSearch")?.value.toLowerCase() || "";
+  if (searchTerm) {
+    orders = orders.filter((o) => {
+      return [o.customer, o.phone, o.id.toString(), o.service].some((field) =>
+        field.toLowerCase().includes(searchTerm),
+      );
+    });
+  }
+
   const tbody = document.getElementById("recentOrdersTable");
 
   if (orders.length === 0) {
@@ -1245,9 +1436,9 @@ async function advanceOrderStatus(orderId) {
 
   // Send SMS notification for status change
   const notificationMessages = {
-    washing: `Hi #{order.customer}, your #{order.service} order #{order.id.toString().slice(-4)} is now being washed. We'll notify you when it's ready!`,
-    ready: `Hi #{order.customer}, your #{order.service} order #{order.id.toString().slice(-4)} is ready for collection at SmartWash. Total: GHS{parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM.`,
-    delivered: `Hi #{order.customer}, your #{order.service} order #{order.id.toString().slice(-4)} has been delivered. Thank you for choosing SmartWash!`,
+    washing: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is now being washed. We'll notify you when it's ready!`,
+    ready: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is ready for collection at SmartWash. Total: GHS${parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM.`,
+    delivered: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} has been delivered. Thank you for choosing SmartWash!`,
   };
 
   if (notificationMessages[nextStatus]) {
@@ -1391,11 +1582,11 @@ async function updateOrderStatus(id, newStatus) {
 
     if (notified) {
       showToast(
-        `Status updated to GHC{newStatus} & customer notified`,
+        `Status updated to ${newStatus} & customer notified`,
         "success",
       );
     } else {
-      showToast(`Order status updated to GHC{newStatus}`, "success");
+      showToast(`Order status updated to ${newStatus}`, "success");
     }
   }
 }
@@ -1403,10 +1594,10 @@ async function updateOrderStatus(id, newStatus) {
 // Notification Sending
 async function sendNotification(order, type) {
   const templates = {
-    ready: `Hi GHS{order.customer}, your GHS{order.service} order #GHS{order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS{parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM. Reply STOP to opt out.`,
-    delivered: `Thank you GHS{order.customer}! Your GHS{order.service} order #GHS{order.id.toString().slice(-4)} has been delivered/collected. We hope you enjoyed our service. Rate us: smartwash.com/rate`,
-    delayed: `Hi GHS{order.customer}, we apologize but your GHS{order.service} order GHS{order.id.toString().slice(-4)} is delayed. New pickup: tomorrow after 2PM. 10% discount applied.`,
-    reminder: `Reminder: GHS{order.customer}, your GHS{order.service} order #GHS{order.id.toString().slice(-4)} is still waiting for pickup at Smartwash. Available today until 8PM.`,
+    ready: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS${parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM. Reply STOP to opt out.`,
+    delivered: `Thank you ${order.customer}! Your ${order.service} order #${order.id.toString().slice(-4)} has been delivered/collected. We hope you enjoyed our service. Rate us: smartwash.com/rate`,
+    delayed: `Hi ${order.customer}, we apologize but your ${order.service} order #${order.id.toString().slice(-4)} is delayed. New pickup: tomorrow after 2PM. 10% discount applied.`,
+    reminder: `Reminder: ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is still waiting for pickup at Smartwash. Available today until 8PM.`,
   };
 
   const message = templates[type] || templates.ready;
@@ -1425,7 +1616,7 @@ async function sendNotification(order, type) {
 
   // Simulate SMS sending delay
   setTimeout(() => {
-    showToast(`SMS sent to GHS{order.customer}`, "success");
+    showToast(`SMS sent to ${order.customer}`, "success");
   }, 500);
 }
 
@@ -1453,9 +1644,9 @@ function updateNotifyTemplate() {
   );
 
   const templates = {
-    ready: `Hi #{order.customer}, your #{order.service} order #{order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS{parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM.`,
-    delayed: `Hi #{order.customer}, we apologize but your #{order.service} order #{order.id.toString().slice(-4)} is delayed. We will notify you when it's ready.`,
-    reminder: `Reminder: #{order.customer}, your #{order.service} order #{order.id.toString().slice(-4)} is waiting for pickup at Smartwash.`,
+    ready: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS${parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM.`,
+    delayed: `Hi ${order.customer}, we apologize but your ${order.service} order #${order.id.toString().slice(-4)} is delayed. We will notify you when it's ready.`,
+    reminder: `Reminder: ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is waiting for pickup at Smartwash.`,
     custom: "",
   };
 
@@ -1563,6 +1754,22 @@ function searchNotifications() {
   loadNotificationCenter();
 }
 
+function handleQuickSearch() {
+  const query =
+    document.getElementById("headerSearch")?.value.trim().toLowerCase() || "";
+  const orderSearch = document.getElementById("searchInput");
+  if (orderSearch) {
+    orderSearch.value = query;
+  }
+
+  if (currentSection === "subscriptions") {
+    loadSubscriptions();
+  } else {
+    loadAllOrders();
+    loadRecentOrders();
+  }
+}
+
 // Utilities
 function showToast(message, type = "success") {
   const container = document.getElementById("toastContainer");
@@ -1599,26 +1806,41 @@ function showToast(message, type = "success") {
 function toggleDarkMode() {
   const html = document.documentElement;
   const isDark = html.getAttribute("data-theme") === "dark";
+  const icon = document.getElementById("darkModeIcon");
 
   if (isDark) {
     html.removeAttribute("data-theme");
-    localStorage.setItem("washify_theme", "light");
-    document.getElementById("darkModeIcon").classList.remove("fa-sun");
-    document.getElementById("darkModeIcon").classList.add("fa-moon");
+    localStorage.setItem("smartwash_theme", "light");
+    if (icon) {
+      icon.classList.remove("fa-sun");
+      icon.classList.add("fa-moon");
+    }
   } else {
     html.setAttribute("data-theme", "dark");
     localStorage.setItem("smartwash_theme", "dark");
-    document.getElementById("darkModeIcon").classList.remove("fa-moon");
-    document.getElementById("darkModeIcon").classList.add("fa-sun");
+    if (icon) {
+      icon.classList.remove("fa-moon");
+      icon.classList.add("fa-sun");
+    }
   }
 }
 
 function loadTheme() {
-  const theme = localStorage.getItem("washify_theme");
+  const theme = localStorage.getItem("smartwash_theme");
+  const icon = document.getElementById("darkModeIcon");
+
   if (theme === "dark") {
     document.documentElement.setAttribute("data-theme", "dark");
-    document.getElementById("darkModeIcon").classList.remove("fa-moon");
-    document.getElementById("darkModeIcon").classList.add("fa-sun");
+    if (icon) {
+      icon.classList.remove("fa-moon");
+      icon.classList.add("fa-sun");
+    }
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    if (icon) {
+      icon.classList.remove("fa-sun");
+      icon.classList.add("fa-moon");
+    }
   }
   loadSettings();
 }
@@ -1633,7 +1855,9 @@ function refreshData() {
 }
 
 function showProfile() {
-  showToast("Profile feature coming soon", "warning");
+  showSection("staff");
+  document.getElementById("pageTitle").textContent = "My Profile";
+  loadStaffSection();
 }
 
 function logout() {
@@ -1744,6 +1968,7 @@ function loadCustomerDropdown() {
 
   const select = document.getElementById("placeOrderCustomer");
   if (select) {
+    select.innerHTML = '<option value="">Select Customer</option>';
     Object.keys(customerMap).forEach((name) => {
       const option = document.createElement("option");
       option.value = name;
@@ -1762,12 +1987,174 @@ function searchDeliveries() {
   // Placeholder for delivery search
 }
 
-function addSubscriptionPlan() {
-  showToast("Add Subscription Plan feature coming soon", "info");
+async function addSubscriptionPlan() {
+  const customer = prompt("Customer name", "New Customer");
+  if (!customer) return;
+
+  const plan = prompt("Plan name", "Premium Wash");
+  if (!plan) return;
+
+  const amount = parseFloat(prompt("Amount (GHS)", "49.99")?.trim() || "0");
+  const frequency = prompt("Frequency", "Monthly");
+  const status = prompt("Status", "Active");
+  const startDate = prompt(
+    "Start date (YYYY-MM-DD)",
+    new Date().toISOString().slice(0, 10),
+  );
+
+  const newSubscription = {
+    id: Date.now(),
+    customer,
+    plan,
+    amount: isNaN(amount) ? 0 : amount,
+    frequency: frequency || "Monthly",
+    status: status || "Active",
+    startDate: startDate || new Date().toISOString().slice(0, 10),
+  };
+
+  await DataStore.addSubscription(newSubscription);
+  loadSubscriptions();
+  loadData();
+  showToast("Subscription added successfully", "success");
 }
 
 function addStaff() {
-  showToast("Add Staff feature coming soon", "info");
+  openStaffModal();
+}
+
+function loadStaffTable() {
+  const staff = DataStore.getStaff();
+  const tbody = document.getElementById("staffTable");
+
+  if (!tbody) return;
+
+  if (staff.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="6" class="empty-state"><i class="fas fa-user-friends"></i><h3>No staff members yet</h3><p>Add your first team member to start managing staff.</p></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = staff
+    .map(
+      (member) => `
+        <tr>
+          <td>${member.name}</td>
+          <td>${member.email}</td>
+          <td>${member.phone || "-"}</td>
+          <td>${member.role}</td>
+          <td>${member.status}</td>
+          <td>
+            <button class="action-btn" onclick="deleteStaffMember('${member.email}')">Remove</button>
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+}
+
+function loadSubscriptions() {
+  const subscriptions = DataStore.getSubscriptions();
+  const searchTerm =
+    document.getElementById("headerSearch")?.value.toLowerCase() || "";
+  const filtered = searchTerm
+    ? subscriptions.filter((sub) => {
+        return [
+          sub.customer,
+          sub.plan,
+          sub.frequency,
+          sub.status,
+          sub.startDate,
+        ].some((field) =>
+          String(field || "")
+            .toLowerCase()
+            .includes(searchTerm),
+        );
+      })
+    : subscriptions;
+
+  const tbody = document.getElementById("subscriptionsTable");
+  if (!tbody) return;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="7" class="empty-state"><i class="fas fa-box-open"></i><h3>No subscriptions found</h3><p>Try another search or add a plan.</p></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered
+    .map(
+      (sub) => `
+        <tr>
+          <td>${sub.customer}</td>
+          <td>${sub.plan}</td>
+          <td>GHS ${parseFloat(sub.amount || 0).toFixed(2)}</td>
+          <td>${sub.frequency}</td>
+          <td>${sub.status}</td>
+          <td>${sub.startDate}</td>
+          <td>
+            <button class="action-btn" onclick="removeSubscription(${sub.id})">Remove</button>
+          </td>
+        </tr>
+      `,
+    )
+    .join("");
+}
+
+async function removeSubscription(id) {
+  const subscriptions = DataStore.getSubscriptions().filter(
+    (subscription) => subscription.id !== id,
+  );
+  await DataStore.saveSubscriptions(subscriptions);
+  loadSubscriptions();
+  loadData();
+  showToast("Subscription removed", "success");
+}
+
+function openStaffModal() {
+  const overlay = document.getElementById("staffModal");
+  if (overlay) overlay.classList.add("active");
+}
+
+function closeStaffModal() {
+  const overlay = document.getElementById("staffModal");
+  if (overlay) overlay.classList.remove("active");
+  const form = document.getElementById("staffForm");
+  if (form) form.reset();
+}
+
+async function deleteStaffMember(email) {
+  await DataStore.deleteStaff(email);
+  loadStaffTable();
+  showToast("Staff member removed", "success");
+}
+
+function handleStaffSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById("staffName").value.trim();
+  const email = document
+    .getElementById("staffEmail")
+    .value.trim()
+    .toLowerCase();
+  const phone = document.getElementById("staffPhone").value.trim();
+  const role = document.getElementById("staffRole").value;
+  const status = document.getElementById("staffStatus").value;
+
+  if (!name || !email) {
+    showToast("Name and email are required", "error");
+    return;
+  }
+
+  DataStore.addStaff({
+    name,
+    email,
+    phone,
+    role,
+    status,
+  }).then(() => {
+    loadStaffTable();
+    closeStaffModal();
+    showToast("Staff member added", "success");
+  });
 }
 
 // Initialize place order form on load
@@ -1802,4 +2189,11 @@ document.addEventListener("DOMContentLoaded", function () {
       calculateTotal();
     });
   }
+
+  const staffForm = document.getElementById("staffForm");
+  if (staffForm) {
+    staffForm.addEventListener("submit", handleStaffSubmit);
+  }
+
+  loadStaffTable();
 });
