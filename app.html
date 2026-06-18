@@ -1704,6 +1704,12 @@
         color: #1e40af;
       }
 
+      .channel-tag.whatsapp {
+        background: #dcfce7;
+        color: #15803d;
+        font-weight: 600;
+      }
+
       .channel-tag.push {
         background: #d1fae5;
         color: #065f46;
@@ -3013,6 +3019,17 @@
               id="notifyCustomerPhone"
               readonly
             />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notification Channel</label>
+            <select
+              class="form-select"
+              id="notifyChannel"
+              onchange="updateNotifyTemplate()"
+            >
+              <option value="sms">📱 SMS</option>
+              <option value="whatsapp">💬 WhatsApp</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Notification Type</label>

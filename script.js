@@ -718,25 +718,25 @@ function loadNotificationCenter() {
 
       return `
                     <tr>
-                        <td>GHS{date}</td>
+                        <td>${date}</td>
                         <td>
                             <div class="customer-info">
-                                <div class="customer-avatar">GHS{n.customer.charAt(0)}</div>
-                                <div class="customer-name">GHS{n.customer}</div>
+                                <div class="customer-avatar">${n.customer.charAt(0)}</div>
+                                <div class="customer-name">${n.customer}</div>
                             </div>
                         </td>
-                        <td>#GHS{n.orderId.toString().slice(-4)}</td>
-                        <td><span class="status-badge status-GHS{typeColors[n.type] || 'pending'}">GHS{n.type}</span></td>
+                        <td>#${n.orderId.toString().slice(-4)}</td>
+                        <td><span class="status-badge status-${typeColors[n.type] || "pending"}">${n.type}</span></td>
                         <td>
-                            <span class="channel-tag GHS{n.channel}">GHS{n.channel}</span>
+                            <span class="channel-tag ${n.channel}">${n.channel}</span>
                         </td>
                         <td>
-                            <span class="status-badge GHS{n.status === 'delivered' ? 'status-ready' : 'status-pending'}">
-                                GHS{n.status}
+                            <span class="status-badge ${n.status === "delivered" ? "status-ready" : "status-pending"}">
+                                ${n.status}
                             </span>
                         </td>
-                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="GHS{n.message}">
-                            GHS{n.message}
+                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${n.message}">
+                            ${n.message}
                         </td>
                     </tr>
                 `;
@@ -1435,7 +1435,13 @@ function openNotificationModal(orderId) {
 
   document.getElementById("notifyCustomerName").value = order.customer;
   document.getElementById("notifyCustomerPhone").value = order.phone;
+
+  // Set default channel based on settings
+  const settings = DataStore.getSettings();
+  const defaultChannel = settings.whatsappNotify ? "whatsapp" : "sms";
+  document.getElementById("notifyChannel").value = defaultChannel;
   document.getElementById("notifyType").value = "ready";
+
   updateNotifyTemplate();
 
   document.getElementById("sendNotificationModal").classList.add("active");
@@ -1448,20 +1454,40 @@ function closeNotificationModal() {
 
 function updateNotifyTemplate() {
   const type = document.getElementById("notifyType").value;
+  const channel = document.getElementById("notifyChannel").value;
   const order = DataStore.getOrders().find(
     (o) => o.id === currentNotifyOrderId,
   );
 
   const templates = {
-    ready: `Hi #{order.customer}, your #{order.service} order #{order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS{parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM.`,
-    delayed: `Hi #{order.customer}, we apologize but your #{order.service} order #{order.id.toString().slice(-4)} is delayed. We will notify you when it's ready.`,
-    reminder: `Reminder: #{order.customer}, your #{order.service} order #{order.id.toString().slice(-4)} is waiting for pickup at Smartwash.`,
-    custom: "",
+    sms: {
+      ready: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS${parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM. Reply STOP to opt out.`,
+      delayed: `Hi ${order.customer}, we apologize but your ${order.service} order #${order.id.toString().slice(-4)} is delayed. We will notify you when it's ready.`,
+      reminder: `Reminder: ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is waiting for pickup at Smartwash.`,
+      custom: "",
+    },
+    whatsapp: {
+      ready: `👋 Hi ${order.customer},\n\n✅ Your ${order.service} order #${order.id.toString().slice(-4)} is now ready for collection!\n\n💰 Total: GHS${parseFloat(order.price).toFixed(2)}\n📍 Smartwash Laundry\n🕐 Open hours: 8AM-8PM\n\nThanks for choosing us! 🧼`,
+      delayed: `⏰ Hi ${order.customer},\n\nWe apologize, but your ${order.service} order #${order.id.toString().slice(-4)} is delayed.\n\n🔄 New ETA: Tomorrow after 2PM\n📞 We'll notify you when it's ready\n\nThank you for your patience! 🙏`,
+      reminder: `📦 Reminder ${order.customer},\n\nYour ${order.service} order #${order.id.toString().slice(-4)} is still waiting for pickup!\n\n📍 Smartwash Laundry\n⏰ Available today until 8PM\n\nCome pick it up! 🚗`,
+      custom: "",
+    },
   };
 
-  document.getElementById("notifyMessage").value = templates[type];
-  document.getElementById("smsPreview").textContent =
-    templates[type] || "Enter your custom message...";
+  const selectedTemplate = templates[channel][type] || "";
+  document.getElementById("notifyMessage").value = selectedTemplate;
+
+  const previewEl = document.getElementById("smsPreview");
+  previewEl.textContent = selectedTemplate || "Enter your custom message...";
+
+  // Update preview styling based on channel
+  if (channel === "whatsapp") {
+    previewEl.style.backgroundColor = "#e8f5e9";
+    previewEl.style.borderLeft = "4px solid #25d366";
+  } else {
+    previewEl.style.backgroundColor = "#e3f2fd";
+    previewEl.style.borderLeft = "4px solid #1976d2";
+  }
 }
 
 async function sendManualNotification() {
@@ -1470,6 +1496,7 @@ async function sendManualNotification() {
   );
   const message = document.getElementById("notifyMessage").value;
   const type = document.getElementById("notifyType").value;
+  const channel = document.getElementById("notifyChannel").value;
 
   if (!message.trim()) {
     showToast("Please enter a message", "error");
@@ -1481,7 +1508,7 @@ async function sendManualNotification() {
     customer: order.customer,
     phone: order.phone,
     type: type,
-    channel: "sms",
+    channel: channel,
     status: "delivered",
     message: message,
   };
@@ -1499,7 +1526,9 @@ async function sendManualNotification() {
   closeNotificationModal();
   loadData();
   updateNotificationBadge();
-  showToast("Notification sent successfully", "success");
+
+  const channelName = channel === "sms" ? "SMS" : "WhatsApp";
+  showToast(`${channelName} notification sent successfully`, "success");
 }
 
 // Settings
