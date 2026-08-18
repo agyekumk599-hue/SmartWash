@@ -898,20 +898,12 @@ function loadNotificationCenter() {
                             </div>
                         </td>
                         <td>#${n.orderId.toString().slice(-4)}</td>
-<<<<<<< HEAD
                         <td><span class="status-badge status-${typeColors[n.type] || "pending"}">${n.type}</span></td>
-=======
-                        <td><span class="status-badge status-${badgeType}">${n.type}</span></td>
->>>>>>> f7e8380b1f5ec9ee5648a0c3fb5985ae5e99c7d6
                         <td>
                             <span class="channel-tag ${n.channel}">${n.channel}</span>
                         </td>
                         <td>
-<<<<<<< HEAD
                             <span class="status-badge ${n.status === "delivered" ? "status-ready" : "status-pending"}">
-=======
-                            <span class="status-badge ${statusClass}">
->>>>>>> f7e8380b1f5ec9ee5648a0c3fb5985ae5e99c7d6
                                 ${n.status}
                             </span>
                         </td>
@@ -1659,7 +1651,6 @@ function updateNotifyTemplate() {
   );
 
   const templates = {
-<<<<<<< HEAD
     sms: {
       ready: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS${parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM. Reply STOP to opt out.`,
       delayed: `Hi ${order.customer}, we apologize but your ${order.service} order #${order.id.toString().slice(-4)} is delayed. We will notify you when it's ready.`,
@@ -1672,12 +1663,6 @@ function updateNotifyTemplate() {
       reminder: `📦 Reminder ${order.customer},\n\nYour ${order.service} order #${order.id.toString().slice(-4)} is still waiting for pickup!\n\n📍 Smartwash Laundry\n⏰ Available today until 8PM\n\nCome pick it up! 🚗`,
       custom: "",
     },
-=======
-    ready: `Hi ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is now ready for collection at Smartwash. Total: GHS${parseFloat(order.price).toFixed(2)}. Open hours: 8AM-8PM.`,
-    delayed: `Hi ${order.customer}, we apologize but your ${order.service} order #${order.id.toString().slice(-4)} is delayed. We will notify you when it's ready.`,
-    reminder: `Reminder: ${order.customer}, your ${order.service} order #${order.id.toString().slice(-4)} is waiting for pickup at Smartwash.`,
-    custom: "",
->>>>>>> f7e8380b1f5ec9ee5648a0c3fb5985ae5e99c7d6
   };
 
   const selectedTemplate = templates[channel][type] || "";
@@ -2012,10 +1997,7 @@ function loadCustomerDropdown() {
 
   const select = document.getElementById("placeOrderCustomer");
   if (select) {
-<<<<<<< HEAD
-=======
     select.innerHTML = '<option value="">Select Customer</option>';
->>>>>>> f7e8380b1f5ec9ee5648a0c3fb5985ae5e99c7d6
     Object.keys(customerMap).forEach((name) => {
       const option = document.createElement("option");
       option.value = name;
@@ -2034,14 +2016,6 @@ function searchDeliveries() {
   // Placeholder for delivery search
 }
 
-<<<<<<< HEAD
-function addSubscriptionPlan() {
-  showToast("Add Subscription Plan feature coming soon", "info");
-}
-
-function addStaff() {
-  showToast("Add Staff feature coming soon", "info");
-=======
 async function addSubscriptionPlan() {
   const customer = prompt("Customer name", "New Customer");
   if (!customer) return;
@@ -2077,142 +2051,6 @@ function addStaff() {
   openStaffModal();
 }
 
-function loadStaffTable() {
-  const staff = DataStore.getStaff();
-  const tbody = document.getElementById("staffTable");
-
-  if (!tbody) return;
-
-  if (staff.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="6" class="empty-state"><i class="fas fa-user-friends"></i><h3>No staff members yet</h3><p>Add your first team member to start managing staff.</p></td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = staff
-    .map(
-      (member) => `
-        <tr>
-          <td>${member.name}</td>
-          <td>${member.email}</td>
-          <td>${member.phone || "-"}</td>
-          <td>${member.role}</td>
-          <td>${member.status}</td>
-          <td>
-            <button class="action-btn" onclick="deleteStaffMember('${member.email}')">Remove</button>
-          </td>
-        </tr>
-      `,
-    )
-    .join("");
-}
-
-function loadSubscriptions() {
-  const subscriptions = DataStore.getSubscriptions();
-  const searchTerm =
-    document.getElementById("headerSearch")?.value.toLowerCase() || "";
-  const filtered = searchTerm
-    ? subscriptions.filter((sub) => {
-        return [
-          sub.customer,
-          sub.plan,
-          sub.frequency,
-          sub.status,
-          sub.startDate,
-        ].some((field) =>
-          String(field || "")
-            .toLowerCase()
-            .includes(searchTerm),
-        );
-      })
-    : subscriptions;
-
-  const tbody = document.getElementById("subscriptionsTable");
-  if (!tbody) return;
-
-  if (filtered.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="7" class="empty-state"><i class="fas fa-box-open"></i><h3>No subscriptions found</h3><p>Try another search or add a plan.</p></td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = filtered
-    .map(
-      (sub) => `
-        <tr>
-          <td>${sub.customer}</td>
-          <td>${sub.plan}</td>
-          <td>GHS ${parseFloat(sub.amount || 0).toFixed(2)}</td>
-          <td>${sub.frequency}</td>
-          <td>${sub.status}</td>
-          <td>${sub.startDate}</td>
-          <td>
-            <button class="action-btn" onclick="removeSubscription(${sub.id})">Remove</button>
-          </td>
-        </tr>
-      `,
-    )
-    .join("");
-}
-
-async function removeSubscription(id) {
-  const subscriptions = DataStore.getSubscriptions().filter(
-    (subscription) => subscription.id !== id,
-  );
-  await DataStore.saveSubscriptions(subscriptions);
-  loadSubscriptions();
-  loadData();
-  showToast("Subscription removed", "success");
-}
-
-function openStaffModal() {
-  const overlay = document.getElementById("staffModal");
-  if (overlay) overlay.classList.add("active");
-}
-
-function closeStaffModal() {
-  const overlay = document.getElementById("staffModal");
-  if (overlay) overlay.classList.remove("active");
-  const form = document.getElementById("staffForm");
-  if (form) form.reset();
-}
-
-async function deleteStaffMember(email) {
-  await DataStore.deleteStaff(email);
-  loadStaffTable();
-  showToast("Staff member removed", "success");
-}
-
-function handleStaffSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById("staffName").value.trim();
-  const email = document
-    .getElementById("staffEmail")
-    .value.trim()
-    .toLowerCase();
-  const phone = document.getElementById("staffPhone").value.trim();
-  const role = document.getElementById("staffRole").value;
-  const status = document.getElementById("staffStatus").value;
-
-  if (!name || !email) {
-    showToast("Name and email are required", "error");
-    return;
-  }
-
-  DataStore.addStaff({
-    name,
-    email,
-    phone,
-    role,
-    status,
-  }).then(() => {
-    loadStaffTable();
-    closeStaffModal();
-    showToast("Staff member added", "success");
-  });
->>>>>>> f7e8380b1f5ec9ee5648a0c3fb5985ae5e99c7d6
-}
-
 // Initialize place order form on load
 document.addEventListener("DOMContentLoaded", function () {
   const placeOrderForm = document.getElementById("placeOrderForm");
@@ -2245,8 +2083,6 @@ document.addEventListener("DOMContentLoaded", function () {
       calculateTotal();
     });
   }
-<<<<<<< HEAD
-=======
 
   const staffForm = document.getElementById("staffForm");
   if (staffForm) {
@@ -2254,5 +2090,4 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   loadStaffTable();
->>>>>>> f7e8380b1f5ec9ee5648a0c3fb5985ae5e99c7d6
 });
